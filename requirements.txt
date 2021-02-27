@@ -1,0 +1,13 @@
+aiofiles==0.6.0
+aiomysql==0.0.21
+alembic==1.5.5
+beautifulsoup4==4.9.3
+databases==0.4.1
+fastapi==0.63.0
+fastapi-utils==0.2.1
+httpx==0.16.1
+PyMySQL==1.0.2
+pydantic==1.7.3
+python-dotenv==0.15.0
+superslug==1.0.1
+uvicorn==0.13.4

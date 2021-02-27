@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Titlex</title>
+    <link rel="shortcut icon" type="image/png" href="/static/favicon.png"/>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js"></script>
+</head>
+<body>
+<script type = "text/javascript">
+    var vm = new Vue({
+        data: { a: 2 },
+        computed: {
+
+            // get only, just need a function
+            aSum: function () {
+                return this.a + 2;
+            },
+
+            // both get and set
+            aSquare: {
+                get: function () {
+                    return this.a*this.a;
+                },
+                set: function (v) {
+                    this.a = v*2;
+                }
+            }
+        }
+    })
+    console.log(vm.aSquare);  // -> 4
+    vm.aSquare = 3;
+    console.log(vm.a);       // -> 6
+    console.log(vm.aSum); // -> 8
+</script>
+</body>
+</html>
+
+
+
+
