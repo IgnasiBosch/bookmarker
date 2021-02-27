@@ -1,17 +1,17 @@
 from http import HTTPStatus
 
 from fastapi import FastAPI
-from fastapi.exceptions import RequestValidationError, HTTPException
 from fastapi_utils.tasks import repeat_every
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.cors import CORSMiddleware
-from starlette.requests import Request
-from starlette.responses import HTMLResponse, FileResponse, PlainTextResponse, \
-    RedirectResponse
+from starlette.responses import (
+    FileResponse,
+    RedirectResponse,
+    JSONResponse,
+)
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from src.auth.use_cases.session import prune_old_sessions
-from src.bookmarks.use_cases.add_bookmark import update_urls
 from src.config import settings
 from src.db import database
 from src.auth.routes import router as auth_router
@@ -38,7 +38,13 @@ async def custom_http_exception_handler(request, exc):
     if exc.status_code == HTTPStatus.NOT_FOUND:
         response = RedirectResponse(url="/")
         return response
-    return exc
+    if exc.status_code == HTTPStatus.INTERNAL_SERVER_ERROR:
+        if settings.debug:
+            raise exc
+
+        return JSONResponse({"status": "Oops"}, status_code=exc.status_code)
+
+    return JSONResponse({"detail": exc.detail}, status_code=exc.status_code)
 
 
 @app.on_event("startup")

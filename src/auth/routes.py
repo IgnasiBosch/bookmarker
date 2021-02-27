@@ -2,6 +2,7 @@ from http import HTTPStatus
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
+from starlette.responses import JSONResponse
 
 from src.auth.exceptions import TokenError, ExpiredToken, NotExpiredToken
 from src.auth.schemas import PublicAccessToken, Credentials, Session
@@ -10,12 +11,13 @@ from src.auth.use_cases.session import (
     get_session_from_public_token,
     get_expired_session_from_public_token,
     refresh_session,
+    logout,
 )
 
 router = APIRouter()
 
 
-reusable_oauth2 = OAuth2PasswordBearer(tokenUrl="/login")
+reusable_oauth2 = OAuth2PasswordBearer(tokenUrl="/api/login")
 
 
 async def get_current_session(
@@ -52,28 +54,28 @@ async def get_current_expired_session(
         )
 
 
-# @router.post(
-#     "/login",
-#     name="Get Token",
-#     response_model=PublicAccessToken,
-#     response_description="Returns user access token",
-#     summary="Authenticate API user",
-#     description="Authenticate an API user and return a token for subsequent requests",
-#     include_in_schema=False,
-# )
-# async def login_handler(
-#     form_data: OAuth2PasswordRequestForm = Depends(),
-# ):
-#     try:
-#         return await login(
-#             Credentials(username=form_data.username, password=form_data.password)
-#         )
-#
-#     except ValueError:
-#         raise HTTPException(
-#             status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
-#             detail="Incorrect credentials",
-#         )
+@router.post(
+    "/api/login",
+    name="Get Token",
+    response_model=PublicAccessToken,
+    response_description="Returns user access token",
+    summary="Authenticate API user",
+    description="Authenticate an API user and return a token for subsequent requests",
+    include_in_schema=False,
+)
+async def login_handler(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+):
+    try:
+        return await login(
+            Credentials(username=form_data.username, password=form_data.password)
+        )
+
+    except ValueError:
+        raise HTTPException(
+            status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
+            detail="Incorrect credentials",
+        )
 
 
 @router.post(
@@ -96,11 +98,12 @@ async def api_token_handler(credentials: Credentials):
         )
 
 
-@router.get("/test")
-async def test_endpoint(
+@router.post("/api/logout")
+async def bookmarks_handle(
     session: Session = Depends(get_current_session),
 ):
-    pass
+    await logout(session)
+    return JSONResponse({"status": "ok"})
 
 
 @router.post(

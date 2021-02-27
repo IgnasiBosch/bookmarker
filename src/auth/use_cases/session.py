@@ -37,6 +37,10 @@ async def login(credentials: Credentials) -> PublicAccessToken:
     return to_public_token(session)
 
 
+async def logout(session: Session):
+    await sessions.delete([session])
+
+
 async def validate_credentials(credentials: Credentials) -> User:
     user = await users.get(email=credentials.username)
 

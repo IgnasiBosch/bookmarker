@@ -1,7 +1,9 @@
 from typing import List
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
+from src.auth.routes import get_current_session
+from src.auth.schemas import Session
 from src.bookmarks.repos import bookmarks
 from src.bookmarks.schemas import Bookmark, PaginationParams
 
@@ -9,9 +11,11 @@ router = APIRouter()
 
 
 @router.get("/api/bookmarks", response_model=List[Bookmark])
-async def read_notes():
-    pagination = PaginationParams(current_page=1, items_per_page=100)
-    return await bookmarks.all()
+async def bookmarks_handle(
+    session: Session = Depends(get_current_session),
+):
+    pagination = PaginationParams(current_page=1, items_per_page=50)
+    return await bookmarks.all(pagination)
 
 
 # @app.post("/notes/", response_model=Note)
