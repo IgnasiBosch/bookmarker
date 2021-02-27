@@ -5,12 +5,11 @@ from typing import Iterable
 from dateutil.relativedelta import relativedelta
 
 from src.db import database
-from src.fetch import scrape_url
-from src.repos import bookmarks
-from src.schemas import BookmarkFilter, Bookmark, PaginationParams
-from src.utils import read_json_file
-
-NUM_FETCH_ENTRIES = 20
+from src.bookmarks.extract import scrape_url
+from src.bookmarks.repos import bookmarks
+from src.bookmarks.schemas import BookmarkFilter, Bookmark, PaginationParams
+from src.bookmarks.utils import read_json_file
+from src.config import settings
 
 
 async def add_urls(urls: Iterable[str]):
@@ -38,14 +37,14 @@ async def update_urls():
     filter_params = BookmarkFilter(
         is_active=True,
         pending_to_fetch=True,
-        last_fetched_before=datetime.now(timezone.utc) - relativedelta(months=1),
+        last_fetched_before=datetime.now(timezone.utc)
+        - relativedelta(days=settings.refresh_urls_older_than_days),
     )
 
-    pagination = PaginationParams(current_page=1, items_per_page=NUM_FETCH_ENTRIES)
+    pagination = PaginationParams(
+        current_page=1, items_per_page=settings.batch_url_extractions
+    )
     entries = await bookmarks.filter(filter_params, pagination)
-
-    # bm = await bookmarks.get(url="https://www.youtube.com/channel/UCRF82wX0EPwqvKMBwvB4fQg/videos")
-    # entries = [bm]
 
     for bookmark in entries:
         print(f"Scraping... {bookmark.url}")

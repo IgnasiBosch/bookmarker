@@ -1,10 +1,9 @@
 from datetime import datetime, timezone
 
 from src.db import database
-from src.repos import bookmarks
-from src.schemas import Bookmark
-
-MAX_FAILED_ERRORS = 5
+from src.bookmarks.repos import bookmarks
+from src.bookmarks.schemas import Bookmark
+from src.config import settings
 
 
 async def url_error(url: str):
@@ -17,7 +16,7 @@ async def url_error(url: str):
         bm.failed_attempts += 1
         bm.last_fetch_at = datetime.now(timezone.utc)
 
-        if bm.failed_attempts >= MAX_FAILED_ERRORS:
+        if bm.failed_attempts >= settings.max_failed_url_extractions:
             bm.is_active = False
 
         await bookmarks.add(bm)

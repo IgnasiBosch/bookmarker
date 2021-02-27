@@ -2,23 +2,33 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Vue + Vuex - User Registration and Login Example & Tutorial</title>
+    <title>Bookmarker</title>
+    <link rel="shortcut icon" type="image/png" href="/static/favicon.png"/>
     <link href="//netdna.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" />
     <style>
         a { cursor: pointer; }
+        .card-image {
+            object-fit: cover;
+            max-width: 150px;
+            max-height: 150px;
+        }
+        ul {
+            columns: 1;
+        }
+
+        li{
+            width: 80%;
+            list-style: none;
+            padding: 20px 0;
+            border-bottom-width: 1px;
+            border-bottom-color: #b8b8b8;
+            border-bottom-style: solid;
+        }
     </style>
 </head>
 <body>
     <div id="app"></div>
 
-    <!-- credits -->
-    <div class="text-center">
-        <p>
-            <a href="http://jasonwatmore.com/post/2018/07/14/vue-vuex-user-registration-and-login-tutorial-example" target="_top">Vue + Vuex - User Registration and Login Tutorial & Example</a>
-        </p>
-        <p>
-            <a href="http://jasonwatmore.com" target="_top">JasonWatmore.com</a>
-        </p>
     </div>
-<script type="text/javascript" src="main.js"></script></body>
+<script type="text/javascript" src="/static/js/main.js"></script></body>
 </html>

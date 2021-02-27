@@ -1,11 +1,81 @@
+from http import HTTPStatus
+
 from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError, HTTPException
+from fastapi_utils.tasks import repeat_every
+from fastapi.staticfiles import StaticFiles
+from starlette.middleware.cors import CORSMiddleware
+from starlette.requests import Request
+from starlette.responses import HTMLResponse, FileResponse, PlainTextResponse, \
+    RedirectResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from src.config import Config
+from src.auth.use_cases.session import prune_old_sessions
+from src.bookmarks.use_cases.add_bookmark import update_urls
+from src.config import settings
+from src.db import database
+from src.auth.routes import router as auth_router
+from src.bookmarks.routes import router as bookmark_router
 
-app = FastAPI()
-config = Config()
+
+additional_cnf = {}
+if not settings.debug:
+    additional_cnf["openapi_url"] = None
+
+app = FastAPI(debug=settings.debug, **additional_cnf)
+app.mount("/static", StaticFiles(directory="static"), name="static")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:8081"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+@app.exception_handler(StarletteHTTPException)
+async def custom_http_exception_handler(request, exc):
+    if exc.status_code == HTTPStatus.NOT_FOUND:
+        response = RedirectResponse(url="/")
+        return response
+    return exc
+
+
+@app.on_event("startup")
+async def db_connect():
+    await database.connect()
+
+
+@app.on_event("startup")
+@repeat_every(
+    seconds=settings.run_refresh_url_task_every_seconds,
+    wait_first=True,
+    raise_exceptions=True,
+)
+async def clean_sessions():
+    await prune_old_sessions()
+
+
+# @app.on_event("startup")
+# @repeat_every(seconds=30, raise_exceptions=True)
+# async def fetch_urls():
+#     await update_urls()
+
+
+@app.on_event("shutdown")
+async def db_disconnect():
+    await database.disconnect()
 
 
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+@app.get("/")
+async def home():
+    return FileResponse("public/index.html")
+
+
+app.include_router(auth_router)
+app.include_router(bookmark_router)

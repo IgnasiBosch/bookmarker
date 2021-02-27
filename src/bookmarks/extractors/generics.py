@@ -14,5 +14,12 @@ class UndefinedExtractor(Extractor):
         return Source.UNDEFINED
 
 
+class ImageExtractor(Extractor):
+    @property
+    def source(self):
+        return Source.IMAGE
 
+    @property
+    def image_url(self):
+        return self.url
 
