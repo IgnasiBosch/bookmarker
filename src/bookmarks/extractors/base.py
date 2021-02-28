@@ -26,9 +26,11 @@ class Extractor:
 
     @property
     def description(self):
-        return self.get_attr_or_none(
+        desc = self.get_attr_or_none(
             self.page.find(attrs={"property": "og:description"}), "content"
         )
+
+        return desc[:500] if desc else desc
 
     @property
     def image_url(self):

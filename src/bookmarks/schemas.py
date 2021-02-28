@@ -30,6 +30,13 @@ class Label(BaseModel):
         return v
 
 
+class BookmarkStats(BaseModel):
+    pending: int
+    total: int
+    inactive: int
+    available: int
+
+
 class OrderedBy(str, Enum):
     random = "random"
     last_fetch_asc = "date"
@@ -55,6 +62,7 @@ class BookmarkFilter(BaseModel):
     is_read: Optional[bool]
     last_fetched_before: Optional[datetime]
     pending_to_fetch: Optional[bool]
+    only_fetched: Optional[bool]
 
 
 class Bookmark(BaseModel):

@@ -3,6 +3,7 @@ from uuid import UUID
 
 from sqlalchemy import or_, and_, func
 from sqlalchemy.ext.compiler import compiles
+from sqlalchemy.orm import Query
 from sqlalchemy.sql import Insert
 
 from src.db import database
@@ -18,23 +19,19 @@ async def add(bookmark: Bookmark) -> Bookmark:
     return bookmark
 
 
-async def all(pagination: Optional[PaginationParams] = None) -> Iterable[Bookmark]:
-    query = bookmarks.select().where(bookmarks.c.title != None)
-
-    if pagination:
-        query = query.limit(pagination.items_per_page).offset(
-            (pagination.current_page - 1) * pagination.items_per_page
-        )
-
-        if pagination.order_by == OrderedBy.random:
-            query = query.order_by(func.rand())
-        elif pagination.order_by == OrderedBy.last_fetch_asc:
-            query = query.order_by(bookmarks.c.last_fetch_at, bookmarks.c.id)
-        elif pagination.order_by == OrderedBy.last_fetch_desc:
-            query = query.order_by(bookmarks.c.last_fetch_at.desc(), bookmarks.c.id)
-
+async def all(
+    filter_params: Optional[BookmarkFilter] = None,
+    pagination: Optional[PaginationParams] = None,
+) -> Iterable[Bookmark]:
+    query = filtered_query(filter_params=filter_params, pagination=pagination)
     result = await database.fetch_all(query)
     return (Bookmark(**dict(r)) for r in result)
+
+
+async def count(filter_params: Optional[BookmarkFilter] = None) -> int:
+    query = filtered_query(filter_params=filter_params).alias("t").count()
+    rs = await database.fetch_one(query)
+    return rs.tbl_row_count
 
 
 async def get(
@@ -62,9 +59,12 @@ async def get(
         return None
 
 
-async def filter(
-    filter_params: BookmarkFilter, pagination: Optional[PaginationParams] = None
-) -> Iterable[Bookmark]:
+def filtered_query(
+    filter_params: Optional[BookmarkFilter] = None,
+    pagination: Optional[PaginationParams] = None,
+) -> Query:
+    filter_params = filter_params or BookmarkFilter()
+
     filters = []
     if filter_params.last_fetched_before:
         filters.append(bookmarks.c.last_fetch_at <= filter_params.last_fetched_before)
@@ -77,24 +77,43 @@ async def filter(
     if filter_params.is_read is not None:
         filters.append(bookmarks.c.is_read == filter_params.is_read)
 
-    where_clause = and_(*filters)
+    where_clause = and_(*filters) if filters else None
+
+    if filter_params.only_fetched:
+        w = and_(bookmarks.c.last_fetch_at != None, bookmarks.c.is_active == True)
+        if where_clause is not None:
+            where_clause = or_(where_clause, w)
+        else:
+            where_clause = w
+
 
     if filter_params.pending_to_fetch:
-        where_clause = or_(where_clause, bookmarks.c.last_fetch_at == None)
+        w = and_(bookmarks.c.last_fetch_at == None, bookmarks.c.is_active == True)
+        if where_clause is not None:
+            where_clause = or_(where_clause, w)
+        else:
+            where_clause = w
 
-    query = (
-        bookmarks.select()
-        .where(where_clause)
-        .order_by(bookmarks.c.last_fetch_at, bookmarks.c.id)
-    )
+    query = bookmarks.select()
+
+    if where_clause is not None:
+        query = query.where(where_clause)
 
     if pagination:
         query = query.limit(pagination.items_per_page).offset(
             (pagination.current_page - 1) * pagination.items_per_page
         )
 
-    result = await database.fetch_all(query)
-    return (Bookmark(**dict(r)) for r in result)
+        if pagination.order_by == OrderedBy.random:
+            query = query.order_by(func.rand())
+        elif pagination.order_by == OrderedBy.last_fetch_asc:
+            query = query.order_by(bookmarks.c.last_fetch_at, bookmarks.c.id)
+        elif pagination.order_by == OrderedBy.last_fetch_desc:
+            query = query.order_by(bookmarks.c.last_fetch_at.desc(), bookmarks.c.id)
+        else:
+            query = query.order_by(bookmarks.c.last_fetch_at.desc(), bookmarks.c.id)
+
+    return query
 
 
 @compiles(Insert)

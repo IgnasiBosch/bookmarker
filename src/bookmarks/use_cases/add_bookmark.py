@@ -10,6 +10,7 @@ from src.bookmarks.extract import scrape_url
 from src.bookmarks.repos import bookmarks
 from src.bookmarks.schemas import BookmarkFilter, Bookmark, PaginationParams
 from src.bookmarks.utils import read_json_file
+from src.bookmarks.use_cases.failed_bookmark import url_error
 from src.config import settings
 
 logger = logging.getLogger(__name__)
@@ -51,11 +52,15 @@ async def update_urls():
     pagination = PaginationParams(
         current_page=1, items_per_page=settings.batch_url_extractions
     )
-    entries = await bookmarks.filter(filter_params, pagination)
+    entries = await bookmarks.all(filter_params, pagination)
 
     for bookmark in entries:
         logger.info(f"Scraping... {bookmark.url}")
         bm = await scrape_url(bookmark.url)
         if bm is None:
             continue
-        await bookmarks.add(bm)
+        try:
+            await bookmarks.add(bm)
+        except Exception as exc:
+            logger.error(f"Error when scrapping: {exc}")
+            await url_error(bookmark.url)
