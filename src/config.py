@@ -41,5 +41,5 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
-log_level = logging.DEBUG if settings.debug else logging.ERROR
+log_level = logging.DEBUG if settings.debug else logging.INFO
 logging.basicConfig(level=log_level)

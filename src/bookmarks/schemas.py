@@ -30,9 +30,20 @@ class Label(BaseModel):
         return v
 
 
+class OrderedBy(str, Enum):
+    random = "random"
+    last_fetch_asc = "date"
+    last_fetch_desc = "-date"
+
+
 class PaginationParams(BaseModel):
     items_per_page: int
     current_page: int
+    order_by: Optional[OrderedBy]
+
+
+class Url(BaseModel):
+    url: AnyHttpUrl
 
 
 class BookmarkFilter(BaseModel):

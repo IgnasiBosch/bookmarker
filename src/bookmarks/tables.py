@@ -5,7 +5,7 @@ from src.db import metadata
 
 
 bookmarks = sa.Table(
-    "boomarks",
+    "bookmarks",
     metadata,
     sa.Column("id", GUID, primary_key=True),
     sa.Column("url", sa.String(1000)),

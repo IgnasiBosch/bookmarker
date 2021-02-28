@@ -6,7 +6,7 @@ from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql import Insert
 
 from src.db import database
-from src.bookmarks.schemas import Bookmark, BookmarkFilter, PaginationParams
+from src.bookmarks.schemas import Bookmark, BookmarkFilter, PaginationParams, OrderedBy
 from src.bookmarks.tables import bookmarks
 
 
@@ -19,17 +19,19 @@ async def add(bookmark: Bookmark) -> Bookmark:
 
 
 async def all(pagination: Optional[PaginationParams] = None) -> Iterable[Bookmark]:
-    query = (
-        bookmarks.select()
-        .where(bookmarks.c.title != None)
-        .order_by(func.rand())
-        # .order_by(bookmarks.c.last_fetch_at, bookmarks.c.id)
-    )
+    query = bookmarks.select().where(bookmarks.c.title != None)
 
     if pagination:
         query = query.limit(pagination.items_per_page).offset(
-            pagination.current_page * pagination.items_per_page
+            (pagination.current_page - 1) * pagination.items_per_page
         )
+
+        if pagination.order_by == OrderedBy.random:
+            query = query.order_by(func.rand())
+        elif pagination.order_by == OrderedBy.last_fetch_asc:
+            query = query.order_by(bookmarks.c.last_fetch_at, bookmarks.c.id)
+        elif pagination.order_by == OrderedBy.last_fetch_desc:
+            query = query.order_by(bookmarks.c.last_fetch_at.desc(), bookmarks.c.id)
 
     result = await database.fetch_all(query)
     return (Bookmark(**dict(r)) for r in result)
@@ -88,7 +90,7 @@ async def filter(
 
     if pagination:
         query = query.limit(pagination.items_per_page).offset(
-            pagination.current_page * pagination.items_per_page
+            (pagination.current_page - 1) * pagination.items_per_page
         )
 
     result = await database.fetch_all(query)

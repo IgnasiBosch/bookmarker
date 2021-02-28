@@ -107,7 +107,7 @@ async def bookmarks_handle(
 
 
 @router.post(
-    "/refresh-session",
+    "/api/refresh-session",
     name="Refresh Token",
     response_model=PublicAccessToken,
     response_description="Same response as Token endpoint",

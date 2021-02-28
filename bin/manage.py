@@ -17,8 +17,6 @@ def execute():
         "src.asgi:app",
         host="127.0.0.1",
         port=int(os.getenv("APP_PORT", 8000)),
-        # fd=0,
-        # uds="/tmp/bookmarker.sock",
         reload=True,
         workers=int(os.getenv("APP_WORKERS", 2)),
     )

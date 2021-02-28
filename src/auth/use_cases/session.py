@@ -65,6 +65,7 @@ async def refresh_session(session: Session) -> PublicAccessToken:
         raise TokenError
 
     new_session = await sessions.add(SessionCreate(user=session.user))
+    await sessions.delete([session])
     return to_public_token(new_session)
 
 

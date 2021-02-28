@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable
@@ -11,11 +12,17 @@ from src.bookmarks.schemas import BookmarkFilter, Bookmark, PaginationParams
 from src.bookmarks.utils import read_json_file
 from src.config import settings
 
+logger = logging.getLogger(__name__)
 
-async def add_urls(urls: Iterable[str]):
+
+async def add_urls(urls: Iterable[str]) -> Iterable[Bookmark]:
+    created_bookmarks = []
     async with database.transaction():
         for url in urls:
-            await bookmarks.add(Bookmark(url=url))
+            bm = await bookmarks.add(Bookmark(url=url))
+            created_bookmarks.append(bm)
+
+    return created_bookmarks
 
 
 async def import_urls_from_browser_bookmarks(path: Path):
@@ -47,7 +54,7 @@ async def update_urls():
     entries = await bookmarks.filter(filter_params, pagination)
 
     for bookmark in entries:
-        print(f"Scraping... {bookmark.url}")
+        logger.info(f"Scraping... {bookmark.url}")
         bm = await scrape_url(bookmark.url)
         if bm is None:
             continue

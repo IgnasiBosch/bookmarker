@@ -12,6 +12,7 @@ from starlette.responses import (
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from src.auth.use_cases.session import prune_old_sessions
+from src.bookmarks.use_cases.add_bookmark import update_urls
 from src.config import settings
 from src.db import database
 from src.auth.routes import router as auth_router
@@ -26,7 +27,7 @@ app = FastAPI(debug=settings.debug, **additional_cnf)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8081"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -62,10 +63,12 @@ async def clean_sessions():
     await prune_old_sessions()
 
 
-# @app.on_event("startup")
-# @repeat_every(seconds=30, raise_exceptions=True)
-# async def fetch_urls():
-#     await update_urls()
+@app.on_event("startup")
+@repeat_every(
+    seconds=settings.run_refresh_url_task_every_seconds, raise_exceptions=True
+)
+async def fetch_urls():
+    await update_urls()
 
 
 @app.on_event("shutdown")
