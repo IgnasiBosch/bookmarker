@@ -37,5 +37,6 @@ async def scrape_url(url: AnyUrl) -> Optional[Bookmark]:
         await url_error(url)
     except Exception as exc:
         logger.debug(f"Unexpected error {url} : {exc}")
+        await url_error(url)
 
     return None

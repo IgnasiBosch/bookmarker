@@ -55,7 +55,7 @@ async def db_connect():
 
 @app.on_event("startup")
 @repeat_every(
-    seconds=settings.run_refresh_url_task_every_seconds,
+    seconds=settings.run_refresh_url_task_every_seconds * 10,
     wait_first=True,
     raise_exceptions=True,
 )

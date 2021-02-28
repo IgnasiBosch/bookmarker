@@ -4,20 +4,22 @@
     <meta charset="UTF-8">
     <title>Bookmarker</title>
     <link rel="shortcut icon" type="image/png" href="/static/favicon.png"/>
-    <link href="//netdna.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" />
+<!--    <link href="//netdna.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" />-->
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet" />
     <style>
         a { cursor: pointer; }
-        .card-image {
+        .items .card-image {
             object-fit: cover;
             max-width: 150px;
             max-height: 150px;
         }
-        ul {
+        .items {
             columns: 1;
+            padding: 0;
         }
 
-        li{
-            width: 80%;
+        .items li{
+            width: 100%;
             list-style: none;
             padding: 20px 0;
             border-bottom-width: 1px;
