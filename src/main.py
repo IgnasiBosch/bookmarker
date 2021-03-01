@@ -13,6 +13,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from src.auth.use_cases.session import prune_old_sessions
 from src.bookmarks.use_cases.add_bookmark import update_urls
+from src.common.exceptions import BaseError
 from src.config import settings
 from src.db import database
 from src.auth.routes import router as auth_router
@@ -46,6 +47,11 @@ async def custom_http_exception_handler(request, exc):
         return JSONResponse({"status": "Oops"}, status_code=exc.status_code)
 
     return JSONResponse({"detail": exc.detail}, status_code=exc.status_code)
+
+
+@app.exception_handler(BaseError)
+async def custom_errors_http_exception_handler(request, exc: BaseError):
+    return JSONResponse(exc.to_json(), status_code=exc.status_code)
 
 
 @app.on_event("startup")

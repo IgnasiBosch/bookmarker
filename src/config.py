@@ -42,4 +42,5 @@ class Settings(BaseSettings):
 settings = Settings()
 
 log_level = logging.DEBUG if settings.debug else logging.INFO
-logging.basicConfig(level=log_level)
+FORMAT = "%(asctime)-15s - %(levelname)s -  %(name)s - %(message)s"
+logging.basicConfig(level=log_level, format=FORMAT, datefmt="%Y-%m-%d %H:%M:%S")

@@ -22,7 +22,7 @@ class Extractor:
     def title(self):
         return self.get_attr_or_none(
             self.page.find(attrs={"property": "og:title"}), "content"
-        )
+        ) or " ".join(self.page.find("title").contents)
 
     @property
     def description(self):

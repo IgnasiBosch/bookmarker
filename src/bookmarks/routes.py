@@ -21,7 +21,7 @@ router = APIRouter()
 @router.get("/api/bookmarks", response_model=List[Bookmark])
 async def bookmarks_handler(
     current_page: int = Query(default=1),
-    items_per_page: int = Query(default=50),
+    items_per_page: int = Query(default=5),
     order_by: Optional[OrderedBy] = Query(default=OrderedBy.last_fetch_desc),
     session: Session = Depends(get_current_session),
 ):
