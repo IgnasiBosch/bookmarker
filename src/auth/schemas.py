@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from typing import Optional
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel, EmailStr, SecretStr, Field, validator
+from pydantic import BaseModel, EmailStr, Field, SecretStr, validator
 
 from src.common.schemas import CamelModel
 

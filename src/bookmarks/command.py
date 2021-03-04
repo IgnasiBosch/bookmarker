@@ -5,8 +5,8 @@ from pathlib import Path
 import typer
 
 from src.bookmarks.use_cases.add_bookmark import (
-    update_urls,
     import_urls_from_browser_bookmarks,
+    update_urls,
 )
 from src.db import connection
 

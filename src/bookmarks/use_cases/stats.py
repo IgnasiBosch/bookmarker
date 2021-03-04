@@ -18,8 +18,5 @@ async def get_stats() -> BookmarkStats:
     available = total - pending - inactive
 
     return BookmarkStats(
-        pending=pending,
-        total=total,
-        inactive=inactive,
-        available=available
+        pending=pending, total=total, inactive=inactive, available=available
     )

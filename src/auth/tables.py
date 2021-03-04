@@ -4,7 +4,6 @@ from sqlalchemy import ForeignKey
 
 from src.db import metadata
 
-
 users = sa.Table(
     "users",
     metadata,

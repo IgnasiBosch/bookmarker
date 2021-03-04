@@ -1,10 +1,8 @@
+import logging
 import os
 
 from dotenv import load_dotenv
 from pydantic import BaseSettings
-
-import logging
-
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 load_dotenv(os.path.join(BASE_DIR, ".env"))
@@ -13,6 +11,8 @@ load_dotenv(os.path.join(BASE_DIR, ".env"))
 class Settings(BaseSettings):
     debug: bool = os.getenv("DEBUG", default=False)
     database_url: str = os.getenv("DATABASE_URL")
+    redis_url: str = os.getenv("REDIS_URL")
+    redis_publish_channel: str = "ws"
     access_token_secret_key: str = os.getenv(  # to create a key: $ openssl rand -hex 32
         "TOKEN_SECRET_KEY",
         default="311ab81a83e1dcfcf5b4575399fce69c71ae36c9c73929984b4ccc0e03a22851",

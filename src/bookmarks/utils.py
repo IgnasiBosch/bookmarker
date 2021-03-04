@@ -4,7 +4,7 @@ from pathlib import Path
 
 import aiofiles
 import httpx
-from httpx import Response, HTTPError
+from httpx import HTTPError, Response
 from pydantic import AnyUrl
 
 

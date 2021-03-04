@@ -7,11 +7,11 @@ from src.auth.schemas import Session
 from src.bookmarks.repos import bookmarks
 from src.bookmarks.schemas import (
     Bookmark,
+    BookmarkFilter,
+    BookmarkStats,
+    OrderedBy,
     PaginationParams,
     Url,
-    OrderedBy,
-    BookmarkStats,
-    BookmarkFilter,
 )
 from src.bookmarks.use_cases import add_urls, get_stats
 

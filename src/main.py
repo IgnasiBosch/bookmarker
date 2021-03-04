@@ -1,28 +1,30 @@
+import logging
 from http import HTTPStatus
 
 from fastapi import FastAPI
-from fastapi_utils.tasks import repeat_every
 from fastapi.staticfiles import StaticFiles
-from starlette.middleware.cors import CORSMiddleware
-from starlette.responses import (
-    FileResponse,
-    RedirectResponse,
-    JSONResponse,
-)
+from fastapi_utils.tasks import repeat_every
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.middleware.cors import CORSMiddleware
+from starlette.responses import FileResponse, JSONResponse, RedirectResponse
+from starlette.websockets import WebSocket
 
+from src.auth.routes import router as auth_router
 from src.auth.use_cases.session import prune_old_sessions
+from src.bookmarks.routes import router as bookmark_router
 from src.bookmarks.use_cases.add_bookmark import update_urls
 from src.common.exceptions import BaseError
 from src.config import settings
 from src.db import database
-from src.auth.routes import router as auth_router
-from src.bookmarks.routes import router as bookmark_router
+from src.redis import broadcast
+
+logger = logging.getLogger(__name__)
 
 
 additional_cnf = {}
 if not settings.debug:
     additional_cnf["openapi_url"] = None
+
 
 app = FastAPI(debug=settings.debug, **additional_cnf)
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -55,8 +57,9 @@ async def custom_errors_http_exception_handler(request, exc: BaseError):
 
 
 @app.on_event("startup")
-async def db_connect():
+async def connect_services():
     await database.connect()
+    await broadcast.connect()
 
 
 @app.on_event("startup")
@@ -78,8 +81,9 @@ async def fetch_urls():
 
 
 @app.on_event("shutdown")
-async def db_disconnect():
+async def disconnect_services():
     await database.disconnect()
+    await broadcast.disconnect()
 
 
 @app.get("/health")
@@ -90,6 +94,19 @@ def health():
 @app.get("/")
 async def home():
     return FileResponse("public/index.html")
+
+
+@app.get("/test/{mymess}")
+async def homex(mymess: str):
+    await broadcast.publish(channel="chatroom", message=mymess)
+
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    async with broadcast.subscribe(channel="chatroom") as subscriber:
+        async for event in subscriber:
+            await websocket.send_text(event.message)
 
 
 app.include_router(auth_router)

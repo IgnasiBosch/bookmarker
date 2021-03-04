@@ -10,7 +10,6 @@ from src.bookmarks.schemas import Bookmark
 from src.bookmarks.use_cases.failed_bookmark import url_error
 from src.bookmarks.utils import fetch_url
 
-
 logger = logging.getLogger(__name__)
 
 

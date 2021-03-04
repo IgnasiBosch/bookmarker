@@ -1,9 +1,9 @@
 from datetime import datetime, timezone
 
-from src.db import database
 from src.bookmarks.repos import bookmarks
 from src.bookmarks.schemas import Bookmark
 from src.config import settings
+from src.db import database
 
 
 async def url_error(url: str):

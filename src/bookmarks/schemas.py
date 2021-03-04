@@ -1,10 +1,10 @@
 import hashlib
 from datetime import datetime
 from enum import Enum
-from typing import Optional, List
+from typing import List, Optional
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel, Field, AnyHttpUrl, validator
+from pydantic import AnyHttpUrl, BaseModel, Field, validator
 from superslug import slugify
 
 

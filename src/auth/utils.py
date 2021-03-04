@@ -1,12 +1,12 @@
-from datetime import timedelta, datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from fastapi.encoders import jsonable_encoder
-from jose import jwt, ExpiredSignatureError, JWTError
+from jose import ExpiredSignatureError, JWTError, jwt
 from passlib.hash import argon2
 from pydantic import SecretStr
 
 from src.auth.exceptions import ExpiredToken, TokenError
-from src.auth.schemas import JWTPayload, Session, PublicAccessToken
+from src.auth.schemas import JWTPayload, PublicAccessToken, Session
 from src.config import Settings, settings
 
 

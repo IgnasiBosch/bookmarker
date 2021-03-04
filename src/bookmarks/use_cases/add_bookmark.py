@@ -5,13 +5,14 @@ from typing import Iterable
 
 from dateutil.relativedelta import relativedelta
 
-from src.db import database
 from src.bookmarks.extract import scrape_url
 from src.bookmarks.repos import bookmarks
-from src.bookmarks.schemas import BookmarkFilter, Bookmark, PaginationParams
-from src.bookmarks.utils import read_json_file
+from src.bookmarks.schemas import Bookmark, BookmarkFilter, PaginationParams
 from src.bookmarks.use_cases.failed_bookmark import url_error
+from src.bookmarks.utils import read_json_file
 from src.config import settings
+from src.db import database
+from src.redis import publish
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +62,7 @@ async def update_urls():
             continue
         try:
             await bookmarks.add(bm)
+            await publish(bm.dict())
         except Exception as exc:
             logger.error(f"Error when scrapping: {exc}")
             await url_error(bookmark.url)

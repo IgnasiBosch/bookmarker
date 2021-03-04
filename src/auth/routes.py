@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Depends
-from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from starlette.responses import JSONResponse
 
-from src.auth.schemas import PublicAccessToken, Credentials, Session
+from src.auth.schemas import Credentials, PublicAccessToken, Session
 from src.auth.use_cases.session import (
-    login,
-    get_session_from_public_token,
     get_expired_session_from_public_token,
-    refresh_session,
+    get_session_from_public_token,
+    login,
     logout,
+    refresh_session,
 )
 
 router = APIRouter()

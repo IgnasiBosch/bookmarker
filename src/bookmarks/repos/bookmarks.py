@@ -1,14 +1,14 @@
-from typing import Optional, Iterable
+from typing import Iterable, Optional
 from uuid import UUID
 
-from sqlalchemy import or_, and_, func
+from sqlalchemy import and_, func, or_
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.orm import Query
 from sqlalchemy.sql import Insert
 
-from src.db import database
-from src.bookmarks.schemas import Bookmark, BookmarkFilter, PaginationParams, OrderedBy
+from src.bookmarks.schemas import Bookmark, BookmarkFilter, OrderedBy, PaginationParams
 from src.bookmarks.tables import bookmarks
+from src.db import database
 
 
 async def add(bookmark: Bookmark) -> Bookmark:
@@ -85,7 +85,6 @@ def filtered_query(
             where_clause = or_(where_clause, w)
         else:
             where_clause = w
-
 
     if filter_params.pending_to_fetch:
         w = and_(bookmarks.c.last_fetch_at == None, bookmarks.c.is_active == True)

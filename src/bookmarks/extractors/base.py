@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from typing import Optional
 
-from bs4 import Tag, BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 
 from src.bookmarks.schemas import Bookmark
 

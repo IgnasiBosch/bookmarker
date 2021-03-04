@@ -1,5 +1,5 @@
 from src.auth.repos import users
-from src.auth.schemas import UserCreate, User
+from src.auth.schemas import User, UserCreate
 from src.auth.utils import hash_password
 
 

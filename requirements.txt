@@ -2,12 +2,14 @@ aiofiles==0.6.0
 aiomysql==0.0.21
 alembic==1.5.5
 argon2-cffi==20.1.0
+asyncio-redis==0.16.0
 beautifulsoup4==4.9.3
+broadcaster==0.2.0
 databases==0.4.1
 email-validator==1.1.2
 fastapi==0.63.0
 fastapi-utils==0.2.1
-httpx==0.16.1
+httpx==0.17.0
 Jinja2==2.11.3
 PyMySQL==0.9.3
 mysqlclient==2.0.3
@@ -19,3 +21,4 @@ python-dotenv==0.15.0
 superslug==1.0.1
 typer==0.3.2
 uvicorn==0.13.4
+websockets==8.1

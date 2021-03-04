@@ -1,12 +1,12 @@
+import logging
 from typing import Dict, Type
 
 from bs4 import BeautifulSoup
-import logging
 
 from src.bookmarks.extractors.base import Extractor
 from src.bookmarks.extractors.generics import (
-    ImageExtractor,
     GenericExtractor,
+    ImageExtractor,
     UndefinedExtractor,
 )
 from src.bookmarks.extractors.github import GithubExtractor

@@ -1,11 +1,11 @@
-from typing import Optional, Iterable
+from typing import Iterable, Optional
 from uuid import UUID
 
 from pymysql import IntegrityError
-from sqlalchemy import select, or_
+from sqlalchemy import or_, select
 
 from src.auth.exceptions import DuplicatedToken
-from src.auth.schemas import Session, SessionFilter, User, SessionCreate
+from src.auth.schemas import Session, SessionCreate, SessionFilter, User
 from src.auth.tables import sessions, users
 from src.db import database
 

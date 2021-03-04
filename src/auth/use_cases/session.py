@@ -1,24 +1,24 @@
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 
 from src.auth.exceptions import (
+    ExpiredToken,
     InvalidCredentials,
     MaxFailedAttemptsRaised,
-    TokenError,
-    ExpiredToken,
     NotExpiredToken,
+    TokenError,
 )
-from src.auth.repos import users, sessions
+from src.auth.repos import sessions, users
 from src.auth.schemas import (
     Credentials,
-    User,
     PublicAccessToken,
+    Session,
     SessionCreate,
     SessionFilter,
-    Session,
+    User,
 )
-from src.auth.utils import is_valid_password, to_public_token, decode_token
-from src.db import database
+from src.auth.utils import decode_token, is_valid_password, to_public_token
 from src.config import settings
+from src.db import database
 
 
 async def login(credentials: Credentials) -> PublicAccessToken:

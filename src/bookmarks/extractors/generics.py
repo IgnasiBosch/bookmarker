@@ -22,4 +22,3 @@ class ImageExtractor(Extractor):
     @property
     def image_url(self):
         return self.url
-

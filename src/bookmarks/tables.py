@@ -3,7 +3,6 @@ from fastapi_utils.guid_type import GUID
 
 from src.db import metadata
 
-
 bookmarks = sa.Table(
     "bookmarks",
     metadata,
