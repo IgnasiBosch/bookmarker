@@ -12,7 +12,6 @@ from src.bookmarks.use_cases.failed_bookmark import url_error
 from src.bookmarks.utils import read_json_file
 from src.config import settings
 from src.db import database
-from src.redis import publish
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +52,7 @@ async def update_urls():
     pagination = PaginationParams(
         current_page=1, items_per_page=settings.batch_url_extractions
     )
-    entries = await bookmarks.all(filter_params, pagination)
+    entries = await bookmarks.all(filter_params=filter_params, pagination=pagination)
 
     for bookmark in entries:
         logger.info(f"Scraping... {bookmark.url}")
@@ -62,7 +61,6 @@ async def update_urls():
             continue
         try:
             await bookmarks.add(bm)
-            await publish(bm.dict())
         except Exception as exc:
             logger.error(f"Error when scrapping: {exc}")
             await url_error(bookmark.url)

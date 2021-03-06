@@ -7,7 +7,6 @@ from fastapi_utils.tasks import repeat_every
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import FileResponse, JSONResponse, RedirectResponse
-from starlette.websockets import WebSocket
 
 from src.auth.routes import router as auth_router
 from src.auth.use_cases.session import prune_old_sessions
@@ -16,21 +15,22 @@ from src.bookmarks.use_cases.add_bookmark import update_urls
 from src.common.exceptions import BaseError
 from src.config import settings
 from src.db import database
-from src.redis import broadcast
 
 logger = logging.getLogger(__name__)
-
 
 additional_cnf = {}
 if not settings.debug:
     additional_cnf["openapi_url"] = None
 
-
 app = FastAPI(debug=settings.debug, **additional_cnf)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://*.ignasibosch.com",
+        "http://localhost:8080",
+        "http://localhost:8081",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -59,31 +59,29 @@ async def custom_errors_http_exception_handler(request, exc: BaseError):
 @app.on_event("startup")
 async def connect_services():
     await database.connect()
-    await broadcast.connect()
 
 
-@app.on_event("startup")
-@repeat_every(
-    seconds=settings.run_refresh_url_task_every_seconds * 10,
-    wait_first=True,
-    raise_exceptions=True,
-)
-async def clean_sessions():
-    await prune_old_sessions()
+# @app.on_event("startup")
+# @repeat_every(
+#     seconds=settings.run_refresh_url_task_every_seconds * 10,
+#     wait_first=True,
+#     raise_exceptions=True,
+# )
+# async def clean_sessions():
+#     await prune_old_sessions()
 
 
-@app.on_event("startup")
-@repeat_every(
-    seconds=settings.run_refresh_url_task_every_seconds, raise_exceptions=True
-)
-async def fetch_urls():
-    await update_urls()
+# @app.on_event("startup")
+# @repeat_every(
+#     seconds=settings.run_refresh_url_task_every_seconds, raise_exceptions=True
+# )
+# async def fetch_urls():
+#     await update_urls()
 
 
 @app.on_event("shutdown")
 async def disconnect_services():
     await database.disconnect()
-    await broadcast.disconnect()
 
 
 @app.get("/health")
@@ -94,19 +92,6 @@ def health():
 @app.get("/")
 async def home():
     return FileResponse("public/index.html")
-
-
-@app.get("/test/{mymess}")
-async def homex(mymess: str):
-    await broadcast.publish(channel="chatroom", message=mymess)
-
-
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
-    async with broadcast.subscribe(channel="chatroom") as subscriber:
-        async for event in subscriber:
-            await websocket.send_text(event.message)
 
 
 app.include_router(auth_router)

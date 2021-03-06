@@ -1,4 +1,4 @@
-from typing import Iterable, Optional
+from typing import Iterable, Optional, Tuple
 from uuid import UUID
 
 from sqlalchemy import and_, func, or_
@@ -6,7 +6,13 @@ from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.orm import Query
 from sqlalchemy.sql import Insert
 
-from src.bookmarks.schemas import Bookmark, BookmarkFilter, OrderedBy, PaginationParams
+from src.bookmarks.schemas import (
+    Bookmark,
+    BookmarkFilter,
+    OrderedBy,
+    PaginationParams,
+    OrderParams,
+)
 from src.bookmarks.tables import bookmarks
 from src.db import database
 
@@ -19,11 +25,20 @@ async def add(bookmark: Bookmark) -> Bookmark:
     return bookmark
 
 
+async def delete(bookmark: Bookmark):
+    query = bookmarks.delete().where(bookmarks.c.id == bookmark.id)
+    _ = await database.execute(query)
+
+
 async def all(
+    order_params: Optional[OrderParams] = None,
     filter_params: Optional[BookmarkFilter] = None,
     pagination: Optional[PaginationParams] = None,
 ) -> Iterable[Bookmark]:
-    query = filtered_query(filter_params=filter_params, pagination=pagination)
+    query = filtered_query(
+        order_params=order_params, filter_params=filter_params, pagination=pagination
+    )
+
     result = await database.fetch_all(query)
     return (Bookmark(**dict(r)) for r in result)
 
@@ -60,6 +75,7 @@ async def get(
 
 
 def filtered_query(
+    order_params: Optional[OrderedBy] = None,
     filter_params: Optional[BookmarkFilter] = None,
     pagination: Optional[PaginationParams] = None,
 ) -> Query:
@@ -103,14 +119,15 @@ def filtered_query(
             (pagination.current_page - 1) * pagination.items_per_page
         )
 
-        if pagination.order_by == OrderedBy.random:
+    if order_params:
+        if order_params.order_by == OrderedBy.random:
             query = query.order_by(func.rand())
-        elif pagination.order_by == OrderedBy.last_fetch_asc:
+        elif order_params.order_by == OrderedBy.last_fetch_asc:
             query = query.order_by(bookmarks.c.last_fetch_at, bookmarks.c.id)
-        elif pagination.order_by == OrderedBy.last_fetch_desc:
+        elif order_params.order_by == OrderedBy.last_fetch_desc:
             query = query.order_by(bookmarks.c.last_fetch_at.desc(), bookmarks.c.id)
-        else:
-            query = query.order_by(bookmarks.c.last_fetch_at.desc(), bookmarks.c.id)
+    else:
+        query = query.order_by(bookmarks.c.last_fetch_at.desc(), bookmarks.c.id)
 
     return query
 

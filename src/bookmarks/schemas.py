@@ -7,6 +7,9 @@ from uuid import UUID, uuid4
 from pydantic import AnyHttpUrl, BaseModel, Field, validator
 from superslug import slugify
 
+from src.common.schemas import PaginationResult
+from src.config import settings
+
 
 class Source(str, Enum):
     GITHUB = "github"
@@ -43,10 +46,13 @@ class OrderedBy(str, Enum):
     last_fetch_desc = "-date"
 
 
+class OrderParams(BaseModel):
+    order_by: Optional[OrderedBy]
+
+
 class PaginationParams(BaseModel):
     items_per_page: int
     current_page: int
-    order_by: Optional[OrderedBy]
 
 
 class Url(BaseModel):
@@ -87,3 +93,14 @@ class Bookmark(BaseModel):
             hasher.update(values["url"].encode())
             return hasher.hexdigest()
         return v
+
+    @validator("image_url", pre=True, always=True)
+    def default_image(cls, v, values, **kwargs):
+        if not v:
+            return f"{settings.base_url}/static/placeholder.jpg"
+        return v
+
+
+class BookmarkResponse(BaseModel):
+    items: List[Bookmark]
+    pagination: Optional[PaginationResult]

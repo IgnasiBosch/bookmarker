@@ -10,6 +10,7 @@ load_dotenv(os.path.join(BASE_DIR, ".env"))
 
 class Settings(BaseSettings):
     debug: bool = os.getenv("DEBUG", default=False)
+    base_url: str = os.getenv("BASE_URL")
     database_url: str = os.getenv("DATABASE_URL")
     redis_url: str = os.getenv("REDIS_URL")
     redis_publish_channel: str = "ws"
