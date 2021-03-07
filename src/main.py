@@ -61,22 +61,22 @@ async def connect_services():
     await database.connect()
 
 
-# @app.on_event("startup")
-# @repeat_every(
-#     seconds=settings.run_refresh_url_task_every_seconds * 10,
-#     wait_first=True,
-#     raise_exceptions=True,
-# )
-# async def clean_sessions():
-#     await prune_old_sessions()
+@app.on_event("startup")
+@repeat_every(
+    seconds=settings.run_refresh_url_task_every_seconds * 10,
+    wait_first=True,
+    raise_exceptions=True,
+)
+async def clean_sessions():
+    await prune_old_sessions()
 
 
-# @app.on_event("startup")
-# @repeat_every(
-#     seconds=settings.run_refresh_url_task_every_seconds, raise_exceptions=True
-# )
-# async def fetch_urls():
-#     await update_urls()
+@app.on_event("startup")
+@repeat_every(
+    seconds=settings.run_refresh_url_task_every_seconds, raise_exceptions=True
+)
+async def fetch_urls():
+    await update_urls()
 
 
 @app.on_event("shutdown")
