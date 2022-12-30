@@ -1,4 +1,4 @@
-from typing import Iterable, Optional, Tuple
+from typing import Iterable, Optional, Dict
 from uuid import UUID
 
 from sqlalchemy import and_, func, or_
@@ -40,13 +40,14 @@ async def all(
     )
 
     result = await database.fetch_all(query)
-    return (Bookmark(**dict(r)) for r in result)
+    return (bookmark_mapper(dict(r)) for r in result)
 
 
 async def count(filter_params: Optional[BookmarkFilter] = None) -> int:
-    query = filtered_query(filter_params=filter_params).alias("t").count()
-    rs = await database.fetch_one(query)
-    return rs.tbl_row_count
+    # query = filtered_query(filter_params=filter_params).alias("t").count()
+    # rs = await database.fetch_one(query)
+    # return rs.tbl_row_count
+    return 0 # TODO: FIX this. new sqlalchemy doesn't have .count method
 
 
 async def get(
@@ -69,10 +70,26 @@ async def get(
     )
     result = await database.fetch_one(query)
     if result:
-        return Bookmark(**dict(result))
+        return bookmark_mapper(dict(result))
     else:
         return None
 
+
+def bookmark_mapper(result: Dict) -> Bookmark:
+    return Bookmark(
+        id=result["id"],
+        title=result["title"] or result["url"],
+        url=result["url"],
+        url_hash=result["url_hash"],
+        source=result["source"],
+        author=result["author"],
+        description=result["description"],
+        image_url=result["image_url"],
+        last_fetch_at=result["last_fetch_at"],
+        is_active=result["is_active"],
+        failed_attempts=result["failed_attempts"],
+        is_read=result["is_read"]
+    )
 
 def filtered_query(
     order_params: Optional[OrderedBy] = None,
